@@ -1,3 +1,4 @@
 [submodule "mmdetection3d"]
 	path = mmdetection3d
-	url = ../mmdetection3d/
+	url = https://github.com/hemildesai/mmdetection3d.git
+	branch = deepspeed
