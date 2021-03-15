@@ -1,12 +1,10 @@
 import argparse
 import os.path as osp
 import pickle
-import base64
 
 import mmcv
-from mmcv import Config, DictAction
+from mmcv import Config
 from mmdet3d.datasets import build_dataset
-from mmdet3d.models import build_detector
 
 
 def parse_args():
@@ -19,6 +17,7 @@ def parse_args():
     return args
 
 
+# This will take up a lot of data. Only run this if you have free space of >200gb
 def main():
     args = parse_args()
     cfg = Config.fromfile(args.config)
@@ -27,24 +26,11 @@ def main():
     dataset = build_dataset(cfg.data.train)
     prog_bar = mmcv.ProgressBar(len(dataset))
 
-    model = build_detector(
-        cfg.model, train_cfg=cfg.get("train_cfg"), test_cfg=cfg.get("test_cfg")
-    )
-
-    for i, datum in enumerate(dataset):
-        if i > 1 and i % 5 == 0:
-            ddd = datum["points"].data
-            ddd = ddd.view(1, -1, 4)
-            vvv, num, coors = model.voxelize(ddd)
-            import pdb
-
-            pdb.set_trace()
-            break
-
-        # filename = datum["img_metas"].data["pts_filename"].split("/")[-1]
-        # filename = osp.splitext(filename)[0]
-        # with open(osp.join(data_dir, f"{filename}.pkl"), 'wb') as fp:
-        #     pickle.dump(datum, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    for _, datum in enumerate(dataset):
+        filename = datum["img_metas"].data["pts_filename"].split("/")[-1]
+        filename = osp.splitext(filename)[0]
+        with open(osp.join(data_dir, f"{filename}.pkl"), "wb") as fp:
+            pickle.dump(datum, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
         prog_bar.update()
 
